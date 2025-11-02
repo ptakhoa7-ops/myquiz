@@ -1,0 +1,18 @@
+[
+  {
+    "question": "What is 2 + 2?",
+    "options": ["3", "4", "5", "6"],
+    "answer": "4"
+  },
+  {
+    "question": "Capital of Japan?",
+    "options": ["Tokyo", "Beijing", "Seoul", "Bangkok"],
+    "answer": "Tokyo"
+  },
+  {
+    "question": "Which planet is known as the Red Planet?",
+    "options": ["Venus", "Mars", "Jupiter", "Mercury"],
+    "answer": "Mars"
+  }
+  // ... add more
+]

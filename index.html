@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Self Quiz Test</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+  h1 { text-align: center; }
+  #quiz-box { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  .question { font-weight: bold; margin-bottom: 10px; }
+  .option { background: #f1f1f1; margin: 5px 0; padding: 8px; border-radius: 4px; cursor: pointer; }
+  .option.selected { background: #d0e6ff; }
+  .option.correct { background: #c8f7c5; }
+  .option.wrong { background: #f7c5c5; }
+  #finishBtn, #nextBtn { margin-top: 15px; padding: 10px 15px; }
+  #result { margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h1>Self Quiz Test</h1>
+<div id="quiz-box">
+  <div id="question-container"></div>
+  <button id="nextBtn" onclick="nextQuestion()">Next</button>
+  <button id="finishBtn" onclick="finishQuiz()" style="display:none;">Finish</button>
+</div>
+<div id="result"></div>
+
+<script>
+let allQuestions = [];
+let quizQuestions = [];
+let current = 0;
+let userAnswers = [];
+let score = 0;
+
+fetch('questions.json')
+  .then(res => res.json())
+  .then(data => {
+    allQuestions = data;
+    quizQuestions = shuffle(allQuestions).slice(0, 10); // random 10 questions
+    showQuestion();
+  });
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function showQuestion() {
+  const q = quizQuestions[current];
+  const container = document.getElementById('question-container');
+  container.innerHTML = `
+    <div class="question">Q${current+1}. ${q.question}</div>
+    ${q.options.map(opt => `<div class="option" onclick="selectOption(this, '${opt}')">${opt}</div>`).join('')}
+  `;
+  document.getElementById('nextBtn').style.display = current < 9 ? 'inline-block' : 'none';
+  document.getElementById('finishBtn').style.display = current === 9 ? 'inline-block' : 'none';
+}
+
+function selectOption(elem, value) {
+  const options = document.querySelectorAll('.option');
+  options.forEach(o => o.classList.remove('selected'));
+  elem.classList.add('selected');
+  userAnswers[current] = value;
+}
+
+function nextQuestion() {
+  if (userAnswers[current] === undefined) return alert('Please select an answer!');
+  current++;
+  showQuestion();
+}
+
+function finishQuiz() {
+  if (userAnswers[current] === undefined) return alert('Please select an answer!');
+  
+  // Calculate score
+  score = 0;
+  quizQuestions.forEach((q, i) => {
+    if (userAnswers[i] === q.answer) score++;
+  });
+
+  // Show results
+  const resultDiv = document.getElementById('result');
+  let html = `<h2>Your Score: ${score} / ${quizQuestions.length}</h2><hr>`;
+  
+  quizQuestions.forEach((q, i) => {
+    const correct = q.answer === userAnswers[i];
+    html += `
+      <div class="question">Q${i+1}. ${q.question}</div>
+      <div>Your Answer: <b style="color:${correct ? 'green' : 'red'}">${userAnswers[i] || 'No answer'}</b></div>
+      <div>Correct Answer: <b>${q.answer}</b></div>
+      <hr>
+    `;
+  });
+
+  document.getElementById('quiz-box').style.display = 'none';
+  resultDiv.innerHTML = html;
+}
+</script>
+
+</body>
+</html>
